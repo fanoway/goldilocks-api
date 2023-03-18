@@ -1,8 +1,6 @@
 use dotenv::dotenv;
-use gql_client::{Client, ClientConfig};
 use redis::Commands;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct Area {
