@@ -1,8 +1,8 @@
 use rocket::{get, launch, routes};
 
-#[get("/hello/<name>/<age>")]
-fn hello(name: &str, age: u8) -> String {
-    format!("Hello, {} year old named {}!", age, name)
+#[get("/v1/areas/<name>")]
+fn hello(name: &str) -> String {
+    format!("Area -{}!", name)
 }
 
 #[launch]
