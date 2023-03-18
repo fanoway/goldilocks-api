@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use gql_client::{Client, ClientConfig};
 use serde::{Deserialize, Serialize};
 
@@ -25,15 +26,20 @@ struct NodeList<T> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // let redis_client = match redis::Client::open("redis://127.0.0.1:6379") {
-    //     Ok(val) => Ok(val),
-    //     Err(val) => {
-    //         println!("{}", val.to_string());
-    //         Err(val.to_string())
-    //     }
-    // }?;
+    // Load env variables
+    dotenv().ok();
 
-    // let redis_connection = redis_client.get_connection()?;
+    // Connect to redis to write data to it
+    let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL must be set.");
+    let redis_client = match redis::Client::open(redis_url) {
+        Ok(val) => Ok(val),
+        Err(val) => {
+            println!("{}", val.to_string());
+            Err(val.to_string())
+        }
+    }?;
+
+    let redis_connection = redis_client.get_connection()?;
 
     let query = "query Locations {
         areas {

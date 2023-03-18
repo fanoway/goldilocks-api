@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dotenv = "0.15.0"
 gql_client = "1.0.7"
 redis = "0.22.3"
 serde ={version = "1.0.156", features = ["derive"]}
