@@ -18,3 +18,8 @@ tokio = {version = "1.26.0", features = ["full"] }
 [[bin]]
 name = "get_areas"
 path = "src/get_areas.rs"
+
+[[bin]]
+name = "clear_areas"
+path = "src/clear_areas.rs"
+
