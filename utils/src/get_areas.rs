@@ -21,11 +21,6 @@ struct Data {
     areas: Vec<Area>,
 }
 
-// #[derive(Deserialize, Serialize, Debug)]
-// struct Areas<T> {
-//     areas: Vec<T>,
-// }
-
 async fn add_area(con: &mut redis::Connection, area: &Area) -> redis::RedisResult<()> {
     let _: () = con.set(
         &area.area_name,
@@ -76,10 +71,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Some(val) => Ok(val),
             None => Err("Error1".to_string()),
         },
-        Err(val) => {
-            // println!("{}", val.to_string());
-            Err(val.to_string())
-        }
+        Err(val) => Err(val.to_string()),
     }?;
 
     for area in &response.areas {
