@@ -1,8 +1,7 @@
 use dotenv::dotenv;
 use gql_client::{Client, ClientConfig};
-use redis::Commands;
+use mongodb::options::ClientOptions;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct Area {
@@ -21,33 +20,13 @@ struct Data {
     areas: Vec<Area>,
 }
 
-async fn add_area(con: &mut redis::Connection, area: &Area) -> redis::RedisResult<()> {
-    let _: () = con.set(
-        &area.area_name,
-        redis::ToRedisArgs::to_redis_args(&json!(area.metadata).to_string()),
-    )?;
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load env variables
     dotenv().ok();
 
-    // Connect to redis so we can write data to it
-    let redis_url = std::env::var("REDIS").expect("REDIS_URL must be set.");
-    let redis_client = match redis::Client::open(redis_url) {
-        Ok(val) => Ok(val),
-        Err(val) => {
-            println!("{}", val.to_string());
-            Err(val.to_string())
-        }
-    }?;
-
-    let mut redis_connection = redis_client.get_connection()?;
-
     // Get areas from openbeta
-    let query = r#"query Locations {
+    let query = r#"query get_areas {
         areas {
           area_name
             metadata {
@@ -55,8 +34,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
               lng
             }
           }
-      }
-      "#;
+        
+      }"#;
 
     let client_config = ClientConfig {
         endpoint: "https://api.openbeta.io".to_string(),
@@ -64,9 +43,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         headers: None,
         proxy: None,
     };
-    let client = Client::new_with_config(client_config);
+    let gql_client = Client::new_with_config(client_config);
 
-    let response = match client.query::<Data>(query).await {
+    let response = match gql_client.query::<Data>(query).await {
         Ok(option) => match option {
             Some(val) => Ok(val),
             None => Err("Error1".to_string()),
@@ -74,13 +53,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(val) => Err(val.to_string()),
     }?;
 
-    for area in &response.areas {
-        add_area(&mut redis_connection, area).await?;
-        // println!(
-        //     "{} | {} | {}",
-        //     area.area_name, area.metadata.lat, area.metadata.lng
-        // );
-    }
+    // Connect to mongodb so we can write data to it
+    let connection_string = std::env::var("MONGO").expect("MONGO must be set as an env var.");
+    let database: String = std::env::var("DATABASE").expect("test");
+    let mongo_client_options = ClientOptions::parse(connection_string).await?;
+    // Get handle
+    let mongo_client = mongodb::Client::with_options(mongo_client_options)?;
+
+    let db = mongo_client.database(&database);
+    let collection = db.collection::<Area>("areas");
+    collection.insert_many(&response.areas, None).await?;
+
+    // for area in &response.areas {
+    //     println!(
+    //         "{} | {} | {}",
+    //         area.area_name, area.metadata.lat, area.metadata.lng
+    //     );
+    // }
 
     Ok(())
 }
