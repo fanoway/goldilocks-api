@@ -9,10 +9,9 @@ edition = "2021"
 dotenv = "0.15.0"
 gql_client = "1.0.7"
 mongodb = "2.4.0"
-redis = "0.22.3"
 serde ={version = "1.0.156", features = ["derive"]}
 serde_json = "1.0.94"
-tokio = {version = "1.26.0", features = ["full"] }
+tokio = { version = "1.26.0", features = ["full"] }
 
 
 # Each handler has to be specified as [[bin]]
