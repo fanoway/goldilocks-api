@@ -23,7 +23,9 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    axum::Server::bind(std::env::var("AXUM_HOST").unwrap().parse().unwrap())
+    let addr_str = std::env::var("AXUM_HOST").unwrap();
+
+    axum::Server::bind(&addr_str.parse().unwrap())
         .serve(app.into_make_service())
         .await
         .expect("Failed to start server");
