@@ -1,11 +1,7 @@
 mod weather_data_model;
-use axum::{
-    extract::{Path, Query},
-    routing::{get, post},
-    Router,
-};
+use axum::{extract::Query, routing::get, Router};
 use dotenv::dotenv;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -39,11 +35,14 @@ struct LatLngParams {
 
 async fn process_weather(Query(latlng): Query<LatLngParams>) -> Result<(), String> {
     // Early exit code for debug purposes
-    return Err(format!("{:?}", latlng));
+    // return Err(format!("{:?}", latlng));
 
     let weather_raw = match weather_data_model::get_weather_from_api(latlng.lat, latlng.lng).await {
         Ok(val) => Ok(val),
-        Err(_) => Err("Error parsing json".to_string()),
+        Err(err) => {
+            println!("{}", err);
+            Err("Error parsing json".to_string())
+        }
     }?;
     match weather_data_model::add_weather_to_db(weather_raw).await {
         Ok(_) => Ok(()),
