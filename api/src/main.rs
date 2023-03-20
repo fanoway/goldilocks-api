@@ -4,12 +4,16 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
 
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() {
+    // Get env vars
+    dotenv().ok();
+
     let app = Router::new().route("/", get(process_weather));
 
     tracing_subscriber::registry()
@@ -19,7 +23,7 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())
+    axum::Server::bind(std::env::var("AXUM_HOST").unwrap().parse().unwrap())
         .serve(app.into_make_service())
         .await
         .expect("Failed to start server");
@@ -32,6 +36,7 @@ struct LatLngParams {
 }
 
 async fn process_weather(Query(latlng): Query<LatLngParams>) -> Result<(), String> {
+    // Early exit code for debug purposes
     return Err(format!("{:?}", latlng));
 
     let weather_raw = match weather_data_model::get_weather_from_api(latlng.lat, latlng.lng).await {
