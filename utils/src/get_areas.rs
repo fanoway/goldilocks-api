@@ -1,22 +1,23 @@
+use datamodels::Area;
 use dotenv::dotenv;
 use gql_client::{Client, ClientConfig};
 use mongodb::options::ClientOptions;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
-struct Area {
-    area_name: String,
-    metadata: Metadata,
+pub struct Area {
+    pub area_name: String,
+    pub metadata: Metadata,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-struct Metadata {
-    lat: f64,
-    lng: f64,
+pub struct Metadata {
+    pub lat: f64,
+    pub lng: f64,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-struct Data {
+pub struct Data {
     areas: Vec<Area>,
 }
 

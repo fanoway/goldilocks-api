@@ -15,3 +15,4 @@ mongodb = "2.4.0"
 tracing = "0.1.37"
 tracing-subscriber = {verison ="0.3.16", features = ["env-filter"]}
 chrono = {version = "0.4.24", features = ["serde"]}
+datamodels = {path = "../datamodels"}

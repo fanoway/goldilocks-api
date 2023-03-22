@@ -1,3 +1,3 @@
 [workspace]
-members = ['api', 'utils']
+members = ['api', 'utils', 'datamodels']
 default-members = ['api']

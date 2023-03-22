@@ -1,11 +1,10 @@
-mod goldilocks_model;
-mod weather_api_model;
-use weather_api_model::WeatherResponse;
+use datamodels::{Area, AreaWeather, Metadata, ResponseAndArea, WeatherResponse};
 
 pub async fn get_weather_from_api(
     lat: f64,
     lng: f64,
 ) -> Result<WeatherResponse, Box<dyn std::error::Error>> {
+    // TODO replace mock_json with real query to weather API
     let mock_json: WeatherResponse = serde_json::from_str(
         r#"{
             "location": {
@@ -763,9 +762,17 @@ pub async fn add_weather_to_db(
     response_json: WeatherResponse,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Add the weather data from a response string to the database
-
-    println!("{:?}", response_json);
+    let response_and_area = ResponseAndArea {
+        response: response_json,
+        area: Area {
+            area_name: "test_area".to_string(),
+            metadata: Metadata {
+                lat: 45.0,
+                lng: -122.0,
+            },
+        },
+    };
+    let goldilocks_model_data: AreaWeather = response_and_area.into();
+    println!("{:?}", goldilocks_model_data);
     Ok(())
 }
-
-// TODO trait to map between weather data models

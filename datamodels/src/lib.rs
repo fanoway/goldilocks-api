@@ -1,6 +1,22 @@
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::{de, Deserialize, Serialize};
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Area {
+    pub area_name: String,
+    pub metadata: Metadata,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Metadata {
+    pub lat: f64,
+    pub lng: f64,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Data {
+    pub areas: Vec<Area>,
+}
 mod weather_datetime_format {
     use chrono::NaiveDateTime;
     use serde::{self, Deserialize, Deserializer, Serializer};
@@ -49,18 +65,18 @@ mod weather_date_format {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WeatherResponse {
-    location: Location,
-    current: Current,
-    forecast: Forecast,
+    pub location: Location,
+    pub current: Current,
+    pub forecast: Forecast,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Location {
-    name: String,
+pub struct Location {
+    pub name: String,
     region: String,
     country: String,
-    lat: f64,
-    lon: f64,
+    pub lat: f64,
+    pub lon: f64,
     tz_id: String,
     localtime_epoch: usize,
     #[serde(with = "weather_datetime_format")]
@@ -68,7 +84,7 @@ struct Location {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Current {
+pub struct Current {
     temp_c: f64,
     temp_f: f64,
     condition: Condition,
@@ -86,14 +102,14 @@ struct Current {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Condition {
+pub struct Condition {
     text: String,
     icon: String,
     code: usize,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct AirQuality {
+pub struct AirQuality {
     co: f64,
     no2: f64,
     o3: f64,
@@ -107,7 +123,7 @@ struct AirQuality {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Forecast {
+pub struct Forecast {
     forecastday: Vec<ForecastDay>,
 }
 
@@ -167,5 +183,24 @@ where
             &val.to_string()[..],
             &["0", "1"],
         )),
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AreaWeather {
+    pub area_name: String,
+}
+
+pub struct ResponseAndArea {
+    pub response: WeatherResponse,
+    pub area: Area,
+}
+
+// TODO trait to map between weather data models
+impl From<ResponseAndArea> for AreaWeather {
+    fn from(ra: ResponseAndArea) -> Self {
+        Self {
+            area_name: ra.area.area_name,
+        }
     }
 }
